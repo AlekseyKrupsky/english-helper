@@ -6,8 +6,8 @@ services:
     build:
       dockerfile: ./docker/php-nginx/Dockerfile
       context: .
-#    depends_on:
-#      - database
+    depends_on:
+      - database
     environment:
       - WEB_DOCUMENT_ROOT=/app/public
       - WEB_ALIAS_DOMAIN=english-helper.local
@@ -24,9 +24,21 @@ services:
       - ./app/:/app/
       - .env:/app/.env
 #      - vendor:/app/vendor
-#    networks:
-#      - workforce
+    networks:
+      - app
 
+  database:
+    image: postgres:${POSTGRES_VERSION:-15}-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_USER: ${POSTGRES_USER:-app}
+    volumes:
+      - ./docker/db/data:/var/lib/postgresql/data:rw
+    networks:
+      - app
 
 #  wordpress:
 #    build:
@@ -115,9 +127,9 @@ services:
 #    networks:
 #      - wordpress
 
-#networks:
-#  wordpress:
-#    driver: bridge
+networks:
+  app:
+    driver: bridge
 
 volumes:
   vendor:
