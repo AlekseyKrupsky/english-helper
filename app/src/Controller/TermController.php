@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\Term2;
+use App\Entity\TermEN;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,12 +31,11 @@ class TermController extends AbstractController
         #[MapQueryParameter] string $translation,
     ): Response
     {
+        $entityManager = $this->registry->getManagerForClass(TermEN::class);
 
-        $entityManager = $this->registry->getManagerForClass(Term2::class);
-
-        $newTerm = new Term2();
-        $newTerm->term = $term;
-        $newTerm->translation = $translation;
+        $newTerm = new TermEN();
+        $newTerm->setTerm($term);
+        $newTerm->setTranslation($translation);
 
         $entityManager->persist($newTerm);
         $entityManager->flush();

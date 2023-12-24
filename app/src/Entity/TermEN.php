@@ -3,10 +3,13 @@
 namespace App\Entity;
 
 use App\Repository\TermRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: TermRepository::class)]
-class Term
+#[ORM\Index(columns: ['term'], name: 'term_en_index')]
+class TermEN
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -16,11 +19,17 @@ class Term
     #[ORM\Column(length: 255)]
     private ?string $term = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $translation = null;
-
     #[ORM\Column]
     private ?bool $learned = null;
+
+    #[ORM\ManyToMany(targetEntity: TermRU::class, inversedBy: "englishTranslations")]
+    #[JoinTable(name: 'en_ru')]
+    private Collection $russianTranslations;
+
+    public function __construct()
+    {
+        $this->russianTranslations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -39,14 +48,14 @@ class Term
         return $this;
     }
 
-    public function getTranslation(): ?string
+    public function getRussianTranslations(): ?string
     {
-        return $this->translation;
+        return $this->russianTranslations;
     }
 
-    public function setTranslation(string $translation): static
+    public function addRussianTranslation(string $translation): static
     {
-        $this->translation = $translation;
+        $this->russianTranslations->add($translation);
 
         return $this;
     }
