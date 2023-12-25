@@ -2,27 +2,46 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\TermRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: TermRepository::class)]
-#[ORM\Index(columns: ['term'], name: 'term_ru_index')]
+#[ApiResource(
+    operations: [
+        new Get(normalizationContext: ['groups' => 'term:item']),
+        new GetCollection(normalizationContext: ['groups' => 'term:list']),
+        new Post(normalizationContext: ['groups' => 'term:add']),
+        new Delete()
+    ],
+    order: ['term' => 'ASC'],
+    paginationEnabled: false,
+)]
 class TermRU
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['term:item', 'term:list'])]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
+    #[Groups(['term:item', 'term:list', 'term:add'])]
     private ?string $term = null;
 
     #[ORM\Column]
+    #[Groups(['term:item', 'term:list', 'term:add'])]
     private ?bool $learned = null;
 
     #[ORM\ManyToMany(targetEntity: TermEN::class, mappedBy: "russianTranslations")]
+    #[Groups(['term:item'])]
     private Collection $englishTranslations;
 
     public function __construct()
