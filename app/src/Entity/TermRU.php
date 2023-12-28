@@ -7,19 +7,25 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use App\Repository\TermRepository;
+use App\Repository\TermRURepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 
-#[ORM\Entity(repositoryClass: TermRepository::class)]
+#[ORM\Entity(repositoryClass: TermRURepository::class)]
 #[ApiResource(
     operations: [
-        new Get(normalizationContext: ['groups' => 'term:item']),
-        new GetCollection(normalizationContext: ['groups' => 'term:list']),
-        new Post(normalizationContext: ['groups' => 'term:add']),
-        new Delete()
+        new Get(
+            uriTemplate: '/terms/ru/{id}',
+            normalizationContext: ['groups' => 'term:item']),
+        new GetCollection(
+            uriTemplate: '/terms/ru',
+            normalizationContext: ['groups' => 'term:list']),
+        new Post(
+            uriTemplate: '/terms/ru',
+            normalizationContext: ['groups' => 'term:add']),
+        new Delete(uriTemplate: '/terms/ru/{id}')
     ],
     order: ['term' => 'ASC'],
     paginationEnabled: false,
@@ -66,7 +72,7 @@ class TermRU
         return $this;
     }
 
-    public function getRussianTranslations(): ?string
+    public function getRussianTranslations(): ?Collection
     {
         return $this->englishTranslations;
     }
