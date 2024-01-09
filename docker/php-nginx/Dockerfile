@@ -4,6 +4,6 @@ COPY ./app /app
 
 WORKDIR /app
 
-RUN url -sS https://get.symfony.com/cli/installer | bash
+RUN curl -sS https://get.symfony.com/cli/installer | bash
 
-export PATH="$HOME/.symfony5/bin:$PATH"
+ENV PATH="/root/.symfony5/bin:${PATH}"
