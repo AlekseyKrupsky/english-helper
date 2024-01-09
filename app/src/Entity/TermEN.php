@@ -7,6 +7,8 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Controller\AddEnglishTermTranslationsController;
+use App\DTO\TranslationDTO;
 use App\Repository\TermENRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,37 +20,47 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(
             uriTemplate: '/terms/en/{id}',
-            normalizationContext: ['groups' => 'term:item']),
+            normalizationContext: ['groups' => 'term:en:item']
+        ),
         new GetCollection(
             uriTemplate: '/terms/en',
-            normalizationContext: ['groups' => 'term:list']),
+            normalizationContext: ['groups' => 'term:en:list']
+        ),
         new Post(
             uriTemplate: '/terms/en',
-            normalizationContext: ['groups' => 'term:add']),
-        new Delete(uriTemplate: '/terms/en/{id}')
+            denormalizationContext: ['groups' => 'term:en:add']
+        ),
+        new Post(
+            uriTemplate: '/api/terms/en/{id}/translations/add',
+            routeName: 'add_translation_en',
+            controller: AddEnglishTermTranslationsController::class,
+            input: TranslationDTO::class,
+        ),
+        new Delete(uriTemplate: '/terms/en/{id}'),
     ],
     order: ['term' => 'ASC'],
     paginationEnabled: false,
 )]
-class TermEN
+class TermEN implements TermInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['term:item', 'term:list'])]
+    #[Groups(['term:en:item', 'term:en:list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['term:item', 'term:list', 'term:add'])]
+    #[Groups(['term:en:item', 'term:en:list', 'term:en:add'])]
     private ?string $term = null;
 
     #[ORM\Column]
-    #[Groups(['term:item', 'term:list', 'term:add'])]
+    #[Groups(['term:en:item', 'term:en:list', 'term:en:add'])]
     private ?bool $learned = null;
 
     #[ORM\ManyToMany(targetEntity: TermRU::class, inversedBy: "englishTranslations")]
-    #[JoinTable(name: 'en_ru')]
-    #[Groups(['term:item'])]
+    #[ORM\JoinColumn(name: "term_en_id", referencedColumnName: "id")]
+    #[ORM\InverseJoinColumn(name: "term_ru_id", referencedColumnName: "id")]
+    #[Groups(['term:en:item'])]
     private Collection $russianTranslations;
 
     public function __construct()
@@ -78,9 +90,11 @@ class TermEN
         return $this->russianTranslations;
     }
 
-    public function addRussianTranslation(string $translation): static
+    public function addRussianTranslation(TermRU $translation): static
     {
-        $this->russianTranslations->add($translation);
+        if (!$this->russianTranslations->contains($translation)) {
+            $this->russianTranslations->add($translation);
+        }
 
         return $this;
     }

@@ -7,6 +7,8 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
+use App\Controller\AddRussianTermTranslationsController;
+use App\DTO\TranslationDTO;
 use App\Repository\TermRURepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -18,36 +20,42 @@ use Symfony\Component\Serializer\Annotation\Groups;
     operations: [
         new Get(
             uriTemplate: '/terms/ru/{id}',
-            normalizationContext: ['groups' => 'term:item']),
+            normalizationContext: ['groups' => 'term:ru:item']),
         new GetCollection(
             uriTemplate: '/terms/ru',
-            normalizationContext: ['groups' => 'term:list']),
+            normalizationContext: ['groups' => 'term:ru:list']),
         new Post(
             uriTemplate: '/terms/ru',
-            normalizationContext: ['groups' => 'term:add']),
+            normalizationContext: ['groups' => 'term:ru:add']),
+        new Post(
+            uriTemplate: '/api/terms/ru/{id}/translations/add',
+            routeName: 'add_translation_ru',
+            controller: AddRussianTermTranslationsController::class,
+            input: TranslationDTO::class,
+        ),
         new Delete(uriTemplate: '/terms/ru/{id}')
     ],
     order: ['term' => 'ASC'],
     paginationEnabled: false,
 )]
-class TermRU
+class TermRU implements TermInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['term:item', 'term:list'])]
+    #[Groups(['term:ru:item', 'term:ru:list'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255, unique: true)]
-    #[Groups(['term:item', 'term:list', 'term:add'])]
+    #[Groups(['term:ru:item', 'term:ru:list', 'term:ru:add'])]
     private ?string $term = null;
 
     #[ORM\Column]
-    #[Groups(['term:item', 'term:list', 'term:add'])]
+    #[Groups(['term:ru:item', 'term:ru:list', 'term:ru:add'])]
     private ?bool $learned = null;
 
     #[ORM\ManyToMany(targetEntity: TermEN::class, mappedBy: "russianTranslations")]
-    #[Groups(['term:item'])]
+    #[Groups(['term:ru:item'])]
     private Collection $englishTranslations;
 
     public function __construct()
@@ -72,14 +80,14 @@ class TermRU
         return $this;
     }
 
-    public function getRussianTranslations(): ?Collection
+    public function getEnglishTranslations(): ?Collection
     {
         return $this->englishTranslations;
     }
 
-    public function addRussianTranslation(string $translation): static
+    public function addEnglishTranslation(TermEN $translation): static
     {
-        $this->englishTranslations->add($translation);
+        $translation->addRussianTranslation($this);
 
         return $this;
     }
