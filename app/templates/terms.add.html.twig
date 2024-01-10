@@ -1,5 +1,46 @@
-<form action="{{ path('addTerm') }}">
+<h1>Add new term</h1>
+
+<a href="{{ path('showTerms', {type: app.request.get('type'), translation: 'ru'}) }}">List terms</a>
+
+<form action="" method="post">
     <input type="text" name="term" placeholder="Term">
-    <input type="text" name="translation" placeholder="Translation">
-    <input type="submit" value="Save">
+
+    <div>
+        <div class="translation-field-wrapper">
+            <input type="text" class="translation-field" name="translations[]" placeholder="Translation">
+        </div>
+
+        <button type="button" class="add-translation">Add</button>
+    </div>
+
+    <input type="text" name="translationTo" value="ru">
+
+    <div>
+        <label for="">
+            Learned <input type="checkbox" name="learned">
+        </label>
+    </div>
+
+    <div>
+        <input type="submit" value="Save">
+    </div>
 </form>
+
+<script>
+    const AddButton = document.querySelector('.add-translation');
+    const RemoveButton = document.querySelector('.remove-translation');
+
+    AddButton.addEventListener('click', function (event) {
+        // const input = document.create
+
+        event.target.insertAdjacentHTML('beforebegin', `<div class="translation-field-wrapper">
+            <input type="text" class="translation-field" name="translations[]" placeholder="Translation">
+            <button type="button" class="remove-translation">Remove</button>
+        </div>`);
+    });
+
+    // RemoveButton.addEventListener('click', function (event) {
+    //     event.target.parent.remove();
+    // });
+
+</script>

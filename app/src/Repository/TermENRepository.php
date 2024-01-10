@@ -21,6 +21,11 @@ class TermENRepository extends ServiceEntityRepository
         parent::__construct($registry, TermEN::class);
     }
 
+    public function getTermsWithTranslations(string $translationType): array
+    {
+        return $this->createQueryBuilder('t')->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return TermEN[] Returns an array of TermEN objects
 //     */

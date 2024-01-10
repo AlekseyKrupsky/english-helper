@@ -1,0 +1,9 @@
+<h1>Terms list</h1>
+
+<a href="{{ path('addTerm', {'type': app.request.get('type')}) }}">Add new</a>
+
+{% for term in terms %}
+    <div>
+        <div>{{ term.learned ? '+' : '-' }} <a href="{{ path('showTerm', {'id': term.id, 'type': term.type}) }}">{{ term.term }}</a>: {{ term.russianTranslations|join(', ') }}</div>
+    </div>
+{% endfor %}

@@ -7,9 +7,10 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
-use App\Controller\AddEnglishTermTranslationsController;
-use App\Controller\RemoveEnglishTermTranslationsController;
+use App\Controller\API\AddEnglishTermTranslationsController;
+use App\Controller\API\RemoveEnglishTermTranslationsController;
 use App\DTO\TranslationDTO;
+use App\Enum\TermType;
 use App\Repository\TermENRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -56,13 +57,15 @@ class TermEN implements TermInterface
     #[Groups(['term:en:item', 'term:en:list'])]
     private ?int $id = null;
 
+    private string $type = 'en';
+
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(['term:en:item', 'term:en:list', 'term:en:add'])]
     private ?string $term = null;
 
-    #[ORM\Column]
+    #[ORM\Column(options: ['default' => 0])]
     #[Groups(['term:en:item', 'term:en:list', 'term:en:add'])]
-    private ?bool $learned = null;
+    private bool $learned = false;
 
     #[ORM\ManyToMany(targetEntity: TermRU::class, inversedBy: "englishTranslations")]
     #[ORM\JoinColumn(name: "term_en_id", referencedColumnName: "id")]
@@ -75,9 +78,19 @@ class TermEN implements TermInterface
         $this->russianTranslations = new ArrayCollection();
     }
 
+    public function __toString(): string
+    {
+        return $this->term ?: '';
+    }
+
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
     }
 
     public function getTerm(): ?string
@@ -89,6 +102,21 @@ class TermEN implements TermInterface
     {
         $this->term = $term;
 
+        return $this;
+    }
+
+    public function getTranslations(TermType $type): ?Collection
+    {
+        return new ArrayCollection();
+    }
+
+    public function addTranslation(TermType $type, TermInterface $term): static
+    {
+        return $this;
+    }
+
+    public function removeTranslation(TermType $type, TermInterface $term): static
+    {
         return $this;
     }
 
@@ -115,7 +143,7 @@ class TermEN implements TermInterface
         return $this;
     }
 
-    public function isLearned(): ?bool
+    public function isLearned(): bool
     {
         return $this->learned;
     }
