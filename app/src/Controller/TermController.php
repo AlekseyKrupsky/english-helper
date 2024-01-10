@@ -74,12 +74,6 @@ class TermController extends AbstractController
         Request $request
     ): Response
     {
-
-//        var_dump($request->get('term'));
-//        var_dump($request->get('translations'));
-//        var_dump($request->get('learned'));
-//        die();
-
         if ($type === 'en') {
             $newTerm = new TermEN();
         } else {
@@ -117,16 +111,6 @@ class TermController extends AbstractController
 
         $this->entityManager->persist($newTerm);
         $this->entityManager->flush();
-
-
-//        $entityManager = $this->registry->getManagerForClass(TermEN::class);
-
-//        $newTerm = new TermEN();
-//        $newTerm->setTerm($term);
-////        $newTerm->setTranslation($translation);
-//
-//        $this->entityManager->persist($newTerm);
-//        $this->entityManager->flush();
 
         return $this->redirectToRoute('addTerm', ['type' => $type]);
     }
