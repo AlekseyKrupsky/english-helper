@@ -20,34 +20,4 @@ class TermENRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TermEN::class);
     }
-
-    public function getTermsWithTranslations(string $translationType): array
-    {
-        return $this->createQueryBuilder('t')->getQuery()->getResult();
-    }
-
-//    /**
-//     * @return TermEN[] Returns an array of TermEN objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?TermEN
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
 }

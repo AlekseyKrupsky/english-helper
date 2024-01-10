@@ -55,7 +55,7 @@ class TermController extends AbstractController
             $repository = $this->entityManager->getRepository(TermRU::class);
         }
 
-        $terms = $repository->getTermsWithTranslations($translation);
+        $terms = $repository->findAll(); // search by translation type
 
         return $this->render('terms.list.html.twig', [
             'terms' => $terms,
