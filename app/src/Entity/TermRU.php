@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Controller\AddRussianTermTranslationsController;
+use App\Controller\RemoveRussianTermTranslationsController;
 use App\DTO\TranslationDTO;
 use App\Repository\TermRURepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -31,6 +32,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
             uriTemplate: '/api/terms/ru/{id}/translations/add',
             routeName: 'add_translation_ru',
             controller: AddRussianTermTranslationsController::class,
+            input: TranslationDTO::class,
+        ),
+        new Post(
+            uriTemplate: '/api/terms/ru/{id}/translations/remove',
+            routeName: 'remove_translation_ru',
+            controller: RemoveRussianTermTranslationsController::class,
             input: TranslationDTO::class,
         ),
         new Delete(uriTemplate: '/terms/ru/{id}')
@@ -88,6 +95,13 @@ class TermRU implements TermInterface
     public function addEnglishTranslation(TermEN $translation): static
     {
         $translation->addRussianTranslation($this);
+
+        return $this;
+    }
+
+    public function removeEnglishTranslation(TermEN $translation): static
+    {
+        $translation->removeRussianTranslation($this);
 
         return $this;
     }

@@ -15,6 +15,11 @@ class TranslationService
         TermEN::class => 'addEnglishTranslation',
     ];
 
+    protected const CLASS_METHOD_REMOVE_MAP = [
+        TermRU::class => 'removeRussianTranslation',
+        TermEN::class => 'removeEnglishTranslation',
+    ];
+
     private IriConverterInterface $iriConverter;
     private EntityManagerInterface $entityManager;
 
@@ -51,8 +56,21 @@ class TranslationService
         $this->entityManager->flush();
     }
 
-    public function removeTranslations(): void
+    public function removeTranslations(TermInterface $term, array $translations): void
     {
+        foreach ($translations as $iri) {
+            $translationTerm = $this->iriConverter->getResourceFromIri($iri);
+            $translationTermType = get_class($translationTerm);
 
+            $methodName = self::CLASS_METHOD_REMOVE_MAP[$translationTermType] ?? null;
+
+            if (!$methodName) {
+                throw new \Exception('ERROR 102');
+            }
+
+            $term->{$methodName}($translationTerm);
+        }
+
+        $this->entityManager->flush();
     }
 }

@@ -8,6 +8,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use App\Controller\AddEnglishTermTranslationsController;
+use App\Controller\RemoveEnglishTermTranslationsController;
 use App\DTO\TranslationDTO;
 use App\Repository\TermENRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -34,6 +35,12 @@ use Symfony\Component\Serializer\Annotation\Groups;
             uriTemplate: '/api/terms/en/{id}/translations/add',
             routeName: 'add_translation_en',
             controller: AddEnglishTermTranslationsController::class,
+            input: TranslationDTO::class,
+        ),
+        new Post(
+            uriTemplate: '/api/terms/en/{id}/translations/remove',
+            routeName: 'remove_translation_en',
+            controller: RemoveEnglishTermTranslationsController::class,
             input: TranslationDTO::class,
         ),
         new Delete(uriTemplate: '/terms/en/{id}'),
@@ -94,6 +101,15 @@ class TermEN implements TermInterface
     {
         if (!$this->russianTranslations->contains($translation)) {
             $this->russianTranslations->add($translation);
+        }
+
+        return $this;
+    }
+
+    public function removeRussianTranslation(TermRU $translation): static
+    {
+        if ($this->russianTranslations->contains($translation)) {
+            $this->russianTranslations->removeElement($translation);
         }
 
         return $this;
