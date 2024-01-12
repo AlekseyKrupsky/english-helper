@@ -4,14 +4,14 @@
     <a href="{{ path('all_languages') }}">Change base language</a>
 </div>
 <div>
-    <a href="{{ path('addTerm', {type: app.request.get('type'), translation: app.request.get('translation')}) }}">Add new</a>
+    <a href="{{ path('addTerm', {baseLang: app.request.get('baseLang'), secondaryLang: app.request.get('secondaryLang')}) }}">Add new</a>
 </div>
 {% for term in terms %}
     <div>
         <div>
-            {{ term.learned ? '+' : '-' }} <a href="{{ path('showTerm', {id: term.id, type: term.type, translation: app.request.get('translation') }) }}">
+            {{ term.learned ? '+' : '-' }} <a href="{{ path('showTerm', {id: term.id, baseLang: term.lang.value, secondaryLang: app.request.get('secondaryLang') }) }}">
                 {{ term.term }}
-            </a>: {{ term.getTranslations(app.request.get('translation'))|join(', ') }}
+            </a>: {{ term.getTranslations(app.request.get('secondaryLang'))|join(', ') }}
         </div>
     </div>
 {% endfor %}

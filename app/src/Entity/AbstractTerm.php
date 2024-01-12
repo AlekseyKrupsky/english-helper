@@ -7,6 +7,8 @@ use Doctrine\Common\Collections\Collection;
 
 abstract class AbstractTerm implements TermInterface
 {
+    private Lang $lang;
+
     protected const CLASS_METHOD_ADD_MAP = [
         TermRU::class => 'addRussianTranslation',
         TermEN::class => 'addEnglishTranslation',
@@ -24,17 +26,22 @@ abstract class AbstractTerm implements TermInterface
 
 //    abstract public function removeTranslation(TermType $type, TermInterface $term): static;
 
-    public function getTranslations(Lang|string $type): ?Collection
+    public function getLang(): Lang
     {
-        if (is_string($type)) {
-            $type = Lang::tryFrom($type);
+        return $this->lang;
+    }
+
+    public function getTranslations(Lang|string $lang): ?Collection
+    {
+        if (is_string($lang)) {
+            $lang = Lang::tryFrom($lang);
         }
 
-        if ($this->getType() === $type->value) {
+        if ($this->getLang() === $lang) {
             throw new \Exception('ERROR 105');
         }
 
-        $methodName = match($type) {
+        $methodName = match($lang) {
             Lang::EN => 'getEnglishTranslations',
             Lang::RU => 'getRussianTranslations',
         };

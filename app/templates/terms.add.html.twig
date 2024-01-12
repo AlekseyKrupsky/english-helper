@@ -1,8 +1,8 @@
 <h1>Add new term</h1>
 
-<a href="{{ path('showTerms', {type: app.request.get('type'), translation: app.request.get('translation')}) }}">List terms</a>
+<a href="{{ path('showTerms', {baseLang: app.request.get('baseLang'), secondaryLang: app.request.get('secondaryLang')}) }}">List terms</a>
 
-<form action="{{ path('addTerm', {type: app.request.get('type'), translation: app.request.get('translation')}) }}" method="post">
+<form action="{{ path('addTerm', {baseLang: app.request.get('baseLang'), secondaryLang: app.request.get('secondaryLang')}) }}" method="post">
     <input type="text" name="term" placeholder="Term">
 
     <div>

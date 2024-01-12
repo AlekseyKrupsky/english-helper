@@ -57,8 +57,6 @@ class TermEN extends AbstractTerm
     #[Groups(['term:en:item', 'term:en:list'])]
     private ?int $id = null;
 
-    private string $type = 'en';
-
     #[ORM\Column(length: 255, unique: true)]
     #[Groups(['term:en:item', 'term:en:list', 'term:en:add'])]
     private ?string $term = null;
@@ -86,11 +84,6 @@ class TermEN extends AbstractTerm
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
     }
 
     public function getTerm(): ?string

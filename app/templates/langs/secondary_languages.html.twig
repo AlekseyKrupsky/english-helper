@@ -2,6 +2,6 @@
 
 {% for lang in secondary_langs %}
     <div>
-        <a href="{{ path('showTerms', {type: app.request.get('baseLang'), translation: lang.value}) }}">{{ lang.value }}</a>
+        <a href="{{ path('showTerms', {baseLang: app.request.get('baseLang'), secondaryLang: lang}) }}">{{ lang.value }}</a>
     </div>
 {% endfor %}
