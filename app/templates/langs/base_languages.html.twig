@@ -1,0 +1,7 @@
+<h1>Choose base language</h1>
+
+{% for lang in langs %}
+    <div>
+        <a href="{{ path('secondary_languages', {baseLang: lang.value}) }}">{{ lang.value }}</a>
+    </div>
+{% endfor %}

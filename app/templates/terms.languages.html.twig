@@ -1,7 +1,0 @@
-<h1>Choose base language</h1>
-
-{% for termType in termTypes %}
-    <div>
-        <a href="{{ path('language_translations', {type: termType.value}) }}">{{ termType.value }}</a>
-    </div>
-{% endfor %}
