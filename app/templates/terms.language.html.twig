@@ -1,0 +1,7 @@
+<h2>Select second language</h2>
+
+{% for termType in termTypes %}
+    <div>
+        <a href="{{ path('showTerms', {type: app.request.get('type'), translation: termType.value}) }}">{{ termType.value }}</a>
+    </div>
+{% endfor %}
