@@ -10,7 +10,7 @@ use ApiPlatform\Metadata\Post;
 use App\Controller\API\AddRussianTermTranslationsController;
 use App\Controller\API\RemoveRussianTermTranslationsController;
 use App\DTO\TranslationDTO;
-use App\Enum\TermType;
+use App\Enum\Lang;
 use App\Repository\TermRURepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -101,12 +101,12 @@ class TermRU extends AbstractTerm
         return $this;
     }
 
-    public function addTranslation(TermType $type, TermInterface $term): static
+    public function addTranslation(Lang $type, TermInterface $term): static
     {
         return $this;
     }
 
-    public function removeTranslation(TermType $type, TermInterface $term): static
+    public function removeTranslation(Lang $type, TermInterface $term): static
     {
         return $this;
     }

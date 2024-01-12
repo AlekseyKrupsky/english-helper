@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Enum\TermType;
+use App\Enum\Lang;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,15 +13,15 @@ class TermBaseController extends AbstractController
     public function showLanguages(): Response
     {
         return $this->render('terms.languages.html.twig', [
-            'termTypes' => TermType::cases(),
+            'termTypes' => Lang::cases(),
         ]);
     }
 
     #[Route('/terms/{type}', name: 'language_translations', requirements: ['type' => 'en|ru'])]
-    public function showLanguageTranslations(TermType $type): Response
+    public function showLanguageTranslations(Lang $type): Response
     {
         return $this->render('terms.language.html.twig', [
-            'termTypes' => TermType::casesExceptOne($type),
+            'termTypes' => Lang::casesExceptOne($type),
         ]);
     }
 }

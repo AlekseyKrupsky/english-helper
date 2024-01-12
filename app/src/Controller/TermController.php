@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Enum\TermType;
+use App\Enum\Lang;
 use App\Services\TermTypeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -25,7 +25,7 @@ class TermController extends AbstractController
     }
 
     #[Route('/to/{translation}', name: 'showTerms', requirements: ['translations' => 'en|ru'])]
-    public function showTerms(TermType $type, TermType $translation): Response
+    public function showTerms(Lang $type, Lang $translation): Response
     {
         if ($type === $translation) {
             throw new \Exception('ERROR 103');
@@ -41,7 +41,7 @@ class TermController extends AbstractController
     }
 
     #[Route('/to/{translation}/{id}', name: 'showTerm')]
-    public function showTerm(TermType $type, TermType $translation, int $id): Response
+    public function showTerm(Lang $type, Lang $translation, int $id): Response
     {
         $repository = $this->termType->getRepositoryByType($type);
 
@@ -67,8 +67,8 @@ class TermController extends AbstractController
 
     #[Route('/to/{translation}/add', methods: 'POST', priority: 2)]
     public function saveTerm(
-        TermType $type,
-        TermType $translationType,
+        Lang    $type,
+        Lang    $translationType,
         Request $request
     ): Response
     {
@@ -108,7 +108,7 @@ class TermController extends AbstractController
     }
 
     #[Route('/{id}/delete', name: 'removeTerm', methods: 'POST')]
-    public function removeTerm(TermType $type, int $id): Response
+    public function removeTerm(Lang $type, int $id): Response
     {
         $repository = $this->termType->getRepositoryByType($type);
 
@@ -128,7 +128,7 @@ class TermController extends AbstractController
     }
 
     #[Route('/{id}/remove-translation/{translationType}/{translationId}', name: 'removeTranslation', methods: 'POST')]
-    public function removeTranslation(TermType $type, int $id, TermType $translationType, int $translationId): Response
+    public function removeTranslation(Lang $type, int $id, Lang $translationType, int $translationId): Response
     {
         if ($type === $translationType) {
             throw new \Exception('ERROR 104');
@@ -145,7 +145,7 @@ class TermController extends AbstractController
         $translationRepository = $this->termType->getRepositoryByType($translationType);
         $translationTerm = $translationRepository->find($translationId);
 
-        if ($translationType === TermType::EN) {
+        if ($translationType === Lang::EN) {
             $term->removeEnglishTranslation($translationTerm);
         } else {
             $term->removeRussianTranslation($translationTerm);
@@ -160,7 +160,7 @@ class TermController extends AbstractController
     }
 
     #[Route('/{id}/add-translations/{translationType}', name: 'AddTranslations', methods: 'POST')]
-    public function addTranslation(TermType $type, int $id, TermType $translationType, Request $request): Response
+    public function addTranslation(Lang $type, int $id, Lang $translationType, Request $request): Response
     {
         if ($type === $translationType) {
             throw new \Exception('ERROR 104');

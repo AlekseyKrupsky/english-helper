@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Entity\TermEN;
 use App\Entity\TermRU;
-use App\Enum\TermType;
+use App\Enum\Lang;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
@@ -17,15 +17,15 @@ class TermTypeService
         $this->entityManager = $entityManager;
     }
 
-    public function getEntityClassByType(TermType $type): string
+    public function getEntityClassByType(Lang $type): string
     {
         return match($type) {
-            TermType::EN => TermEN::class,
-            TermType::RU => TermRU::class,
+            Lang::EN => TermEN::class,
+            Lang::RU => TermRU::class,
         };
     }
 
-    public function getRepositoryByType(TermType $type): EntityRepository
+    public function getRepositoryByType(Lang $type): EntityRepository
     {
         return $this->entityManager->getRepository($this->getEntityClassByType($type));
     }

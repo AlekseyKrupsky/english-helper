@@ -2,14 +2,14 @@
 
 namespace App\Enum;
 
-enum TermType: string
+enum Lang: string
 {
     case EN = 'en';
     case RU = 'ru';
 
-    public static function casesExceptOne(TermType $exceptionType): array
+    public static function casesExceptOne(Lang $exceptionType): array
     {
-        $allTypes = TermType::cases();
+        $allTypes = Lang::cases();
 
         return array_filter($allTypes, function ($type) use ($exceptionType) {
             return $type !== $exceptionType;

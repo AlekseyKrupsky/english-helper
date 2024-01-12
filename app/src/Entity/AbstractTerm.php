@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Enum\TermType;
+use App\Enum\Lang;
 use Doctrine\Common\Collections\Collection;
 
 abstract class AbstractTerm implements TermInterface
@@ -24,10 +24,10 @@ abstract class AbstractTerm implements TermInterface
 
 //    abstract public function removeTranslation(TermType $type, TermInterface $term): static;
 
-    public function getTranslations(TermType|string $type): ?Collection
+    public function getTranslations(Lang|string $type): ?Collection
     {
         if (is_string($type)) {
-            $type = TermType::tryFrom($type);
+            $type = Lang::tryFrom($type);
         }
 
         if ($this->getType() === $type->value) {
@@ -35,8 +35,8 @@ abstract class AbstractTerm implements TermInterface
         }
 
         $methodName = match($type) {
-            TermType::EN => 'getEnglishTranslations',
-            TermType::RU => 'getRussianTranslations',
+            Lang::EN => 'getEnglishTranslations',
+            Lang::RU => 'getRussianTranslations',
         };
 
         return $this->$methodName();
