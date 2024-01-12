@@ -1,8 +1,8 @@
 <h1>Add new term</h1>
 
-<a href="{{ path('showTerms', {type: app.request.get('type'), translation: 'ru'}) }}">List terms</a>
+<a href="{{ path('showTerms', {type: app.request.get('type'), translation: app.request.get('translation')}) }}">List terms</a>
 
-<form action="" method="post">
+<form action="{{ path('addTerm', {type: app.request.get('type'), translation: app.request.get('translation')}) }}" method="post">
     <input type="text" name="term" placeholder="Term">
 
     <div>
@@ -12,8 +12,6 @@
 
         <button type="button" class="add-translation">Add</button>
     </div>
-
-    <input type="text" name="translationTo" value="ru">
 
     <div>
         <label for="">

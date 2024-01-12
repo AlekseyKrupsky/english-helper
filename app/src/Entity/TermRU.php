@@ -46,7 +46,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
     order: ['term' => 'ASC'],
     paginationEnabled: false,
 )]
-class TermRU implements TermInterface
+class TermRU extends AbstractTerm
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -99,11 +99,6 @@ class TermRU implements TermInterface
         $this->term = $term;
 
         return $this;
-    }
-
-    public function getTranslations(TermType $type): ?Collection
-    {
-        return new ArrayCollection();
     }
 
     public function addTranslation(TermType $type, TermInterface $term): static

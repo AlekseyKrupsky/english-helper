@@ -7,9 +7,9 @@
 </div>
 
 <div>
-    {% for translation in term.russianTranslations %}
+    {% for translation in translations %}
         <div>
-            <a href="{{ path('showTerm', {id: translation.id, type: translation.type}) }}">{{ translation.term }}</a>
+            <a href="{{ path('showTerm', {id: translation.id, type: translation.type, translation: term.type}) }}">{{ translation.term }}</a>
 
             <form action="{{ path('removeTranslation', {id: term.id, type: term.type, translationType: translation.type, translationId: translation.id}) }}" method="post">
                 <input type="submit" value="Delete">
@@ -20,7 +20,7 @@
 
 <h3>Add translations</h3>
 
-<form action="{{ path('AddTranslations', {id: term.id, type: term.type, translationType: 'ru'}) }}" method="post">
+<form action="{{ path('AddTranslations', {id: term.id, type: term.type, translationType: app.request.get('translation')}) }}" method="post">
     <div>
         <div class="translation-field-wrapper">
             <input type="text" class="translation-field" name="translations[]" placeholder="Translation">
@@ -33,7 +33,7 @@
 </form>
 
 <div>
-    <a href="{{ path('showTerms', {type: term.type, translation: 'ru'}) }}">List terms</a>
+    <a href="{{ path('showTerms', {type: term.type, translation: app.request.get('translation')}) }}">List terms</a>
 </div>
 
 <form action="{{ path('removeTerm', {type: term.type, id: term.id}) }}" method="post">

@@ -1,9 +1,17 @@
 <h1>Terms list</h1>
 
-<a href="{{ path('addTerm', {'type': app.request.get('type')}) }}">Add new</a>
-
+<div>
+    <a href="{{ path('all_languages') }}">Change base language</a>
+</div>
+<div>
+    <a href="{{ path('addTerm', {type: app.request.get('type'), translation: app.request.get('translation')}) }}">Add new</a>
+</div>
 {% for term in terms %}
     <div>
-        <div>{{ term.learned ? '+' : '-' }} <a href="{{ path('showTerm', {'id': term.id, 'type': term.type}) }}">{{ term.term }}</a>: {{ term.russianTranslations|join(', ') }}</div>
+        <div>
+            {{ term.learned ? '+' : '-' }} <a href="{{ path('showTerm', {id: term.id, type: term.type, translation: app.request.get('translation') }) }}">
+                {{ term.term }}
+            </a>: {{ term.getTranslations(app.request.get('translation'))|join(', ') }}
+        </div>
     </div>
 {% endfor %}

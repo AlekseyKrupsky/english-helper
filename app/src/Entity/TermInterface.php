@@ -11,7 +11,7 @@ interface TermInterface
     public function getType(): string;
     public function addTranslation(TermType $type, TermInterface $term): static;
     public function removeTranslation(TermType $type, TermInterface $term): static;
-    public function getTranslations(TermType $type): ?Collection;
+    public function getTranslations(TermType|string $type): ?Collection;
     public function isLearned(): bool;
     public function setLearned(bool $learned): static;
 }

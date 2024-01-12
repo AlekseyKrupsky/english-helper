@@ -24,22 +24,6 @@ class TermController extends AbstractController
         $this->termType = $typeService;
     }
 
-    #[Route('/{id}', name: 'showTerm')]
-    public function showTerm(TermType $type, int $id): Response
-    {
-        $repository = $this->termType->getRepositoryByType($type);
-
-        $term = $repository->find($id);
-
-        if (!$term) {
-            throw new NotFoundHttpException();
-        }
-
-        return $this->render('terms.show.html.twig', [
-            'term' => $term,
-        ]);
-    }
-
     #[Route('/to/{translation}', name: 'showTerms', requirements: ['translations' => 'en|ru'])]
     public function showTerms(TermType $type, TermType $translation): Response
     {
@@ -56,15 +40,35 @@ class TermController extends AbstractController
         ]);
     }
 
-    #[Route('/add', name: 'addTerm', methods: 'GET', priority: 2)]
+    #[Route('/to/{translation}/{id}', name: 'showTerm')]
+    public function showTerm(TermType $type, TermType $translation, int $id): Response
+    {
+        $repository = $this->termType->getRepositoryByType($type);
+
+        $term = $repository->find($id);
+
+        if (!$term) {
+            throw new NotFoundHttpException();
+        }
+
+        $termTranslations = $term->getTranslations($translation);
+
+        return $this->render('terms.show.html.twig', [
+            'term' => $term,
+            'translations' => $termTranslations,
+        ]);
+    }
+
+    #[Route('/to/{translation}/add', name: 'addTerm', methods: 'GET', priority: 2)]
     public function showAddForm(): Response
     {
         return $this->render('terms.add.html.twig');
     }
 
-    #[Route('/add', methods: 'POST', priority: 2)]
+    #[Route('/to/{translation}/add', methods: 'POST', priority: 2)]
     public function saveTerm(
         TermType $type,
+        TermType $translationType,
         Request $request
     ): Response
     {
@@ -76,8 +80,7 @@ class TermController extends AbstractController
         $newTerm->setTerm($request->get('term'));
         $newTerm->setLearned(!!$request->get('learned'));
 
-        $translationToType = TermType::tryFrom($request->get('translationTo'));
-        $repository = $this->termType->getRepositoryByType($translationToType);
+        $repository = $this->termType->getRepositoryByType($translationType);
 
         foreach ($request->get('translations') as $translation) {
             if (!$translation) {
@@ -87,7 +90,7 @@ class TermController extends AbstractController
             $translationTerm = $repository->findOneBy(['term' => $translation]);
 
             if ($translationTerm === null) {
-                $translationEntityClass = $this->termType->getEntityClassByType($translationToType);
+                $translationEntityClass = $this->termType->getEntityClassByType($translationType);
 
                 $translationTerm = new $translationEntityClass();
                 $translationTerm->setTerm($translation);
@@ -101,7 +104,7 @@ class TermController extends AbstractController
         $this->entityManager->persist($newTerm);
         $this->entityManager->flush();
 
-        return $this->redirectToRoute('addTerm', ['type' => $type->value]);
+        return $this->redirectToRoute('addTerm', ['type' => $type->value, 'translation' => $translationType->value]);
     }
 
     #[Route('/{id}/delete', name: 'removeTerm', methods: 'POST')]
