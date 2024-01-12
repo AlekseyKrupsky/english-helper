@@ -8,7 +8,7 @@ use App\Enum\Lang;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
-class TermTypeService
+class LangService
 {
     private EntityManagerInterface $entityManager;
 

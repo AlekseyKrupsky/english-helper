@@ -2,8 +2,8 @@
 
 namespace App\Command;
 
-use App\Entity\TermEN;
-use App\Entity\TermRU;
+use App\Enum\Lang;
+use App\Services\LangService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -19,19 +19,21 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class TermsLoadCommand extends Command
 {
     private EntityManagerInterface $entityManager;
+    private LangService $langService;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, LangService $langService)
     {
         parent::__construct();
 
         $this->entityManager = $entityManager;
+        $this->langService = $langService;
     }
 
     protected function configure(): void
     {
         $this
             ->addOption('file', null,InputOption::VALUE_REQUIRED, 'Path to file with terms')
-            ->addOption('type', null,InputOption::VALUE_REQUIRED, 'Lang: ru, en')
+            ->addOption('lang', null,InputOption::VALUE_REQUIRED, 'Lang: ru, en')
             ->addOption('known', 'k',InputOption::VALUE_NONE, 'Optional. Known terms or not. Unknown by default')
             ->addOption('dry-run', 'd', InputOption::VALUE_NONE, 'Without saving changes');
     }
@@ -41,17 +43,13 @@ class TermsLoadCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $filePath = $input->getOption('file');
-        $termType = $input->getOption('type');
+        $lang = Lang::tryFrom($input->getOption('lang'));
         $known = $input->getOption('known');
 
         $terms = $this->loadArrayFromFile($filePath);
         $terms = array_unique($terms);
 
-        if ($termType === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $repository = $this->langService->getRepositoryByType($lang);
 
         $countTotal = 0;
         $countInserted = 0;
@@ -67,7 +65,9 @@ class TermsLoadCommand extends Command
                 continue;
             }
 
-            $newTerm = new TermEN();
+            $termClassName = $this->langService->getEntityClassByType($lang);
+
+            $newTerm = $termClassName();
             $newTerm->setLearned($known);
             $newTerm->setTerm($term);
 

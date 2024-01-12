@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Enum\Lang;
-use App\Services\TermTypeService;
+use App\Services\LangService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -16,9 +16,9 @@ use Symfony\Component\Routing\Annotation\Route;
 class TermController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
-    private TermTypeService $termType;
+    private LangService $termType;
 
-    public function __construct(EntityManagerInterface $entityManager, TermTypeService $typeService)
+    public function __construct(EntityManagerInterface $entityManager, LangService $typeService)
     {
         $this->entityManager = $entityManager;
         $this->termType = $typeService;
