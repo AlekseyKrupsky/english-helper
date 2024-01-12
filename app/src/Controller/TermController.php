@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
-use App\Entity\TermEN;
-use App\Entity\TermRU;
+use App\Enum\TermType;
+use App\Services\TermTypeService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,24 +12,22 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
-
+#[Route('/terms/{type}', requirements: ['type' => 'en|ru'])]
 class TermController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
+    private TermTypeService $termType;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, TermTypeService $typeService)
     {
         $this->entityManager = $entityManager;
+        $this->termType = $typeService;
     }
 
-    #[Route('/terms/{type}/{id}', name: 'showTerm')]
-    public function showTerm(string $type, int $id): Response
+    #[Route('/{id}', name: 'showTerm')]
+    public function showTerm(TermType $type, int $id): Response
     {
-        if ($type === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $repository = $this->termType->getRepositoryByType($type);
 
         $term = $repository->find($id);
 
@@ -42,18 +40,14 @@ class TermController extends AbstractController
         ]);
     }
 
-    #[Route('/terms/{type}/to/{translation}', name: 'showTerms', requirements: ['type' => 'en|ru', 'translations' => 'en|ru'])]
-    public function showTerms(string $type, string $translation): Response
+    #[Route('/to/{translation}', name: 'showTerms', requirements: ['translations' => 'en|ru'])]
+    public function showTerms(TermType $type, TermType $translation): Response
     {
         if ($type === $translation) {
             throw new \Exception('ERROR 103');
         }
 
-        if ($type === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $repository = $this->termType->getRepositoryByType($type);
 
         $terms = $repository->findAll(); // search by translation type
 
@@ -62,35 +56,28 @@ class TermController extends AbstractController
         ]);
     }
 
-    #[Route('/terms/{type}/add', name: 'addTerm', methods: 'GET', priority: 2)]
+    #[Route('/add', name: 'addTerm', methods: 'GET', priority: 2)]
     public function showAddForm(): Response
     {
         return $this->render('terms.add.html.twig');
     }
 
-    #[Route('/terms/{type}/add', methods: 'POST', priority: 2)]
+    #[Route('/add', methods: 'POST', priority: 2)]
     public function saveTerm(
-        string $type,
+        TermType $type,
         Request $request
     ): Response
     {
-        if ($type === 'en') {
-            $newTerm = new TermEN();
-        } else {
-            $newTerm = new TermRU();
-        }
+        $entityClass = $this->termType->getEntityClassByType($type);
+        $newTerm = new $entityClass();
+
         //validation on exist
 
         $newTerm->setTerm($request->get('term'));
         $newTerm->setLearned(!!$request->get('learned'));
 
-        $translationToType = $request->get('translationTo');
-
-        if ($translationToType === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $translationToType = TermType::tryFrom($request->get('translationTo'));
+        $repository = $this->termType->getRepositoryByType($translationToType);
 
         foreach ($request->get('translations') as $translation) {
             if (!$translation) {
@@ -100,7 +87,9 @@ class TermController extends AbstractController
             $translationTerm = $repository->findOneBy(['term' => $translation]);
 
             if ($translationTerm === null) {
-                $translationTerm = new TermRU();
+                $translationEntityClass = $this->termType->getEntityClassByType($translationToType);
+
+                $translationTerm = new $translationEntityClass();
                 $translationTerm->setTerm($translation);
 
                 $this->entityManager->persist($translationTerm);
@@ -112,17 +101,13 @@ class TermController extends AbstractController
         $this->entityManager->persist($newTerm);
         $this->entityManager->flush();
 
-        return $this->redirectToRoute('addTerm', ['type' => $type]);
+        return $this->redirectToRoute('addTerm', ['type' => $type->value]);
     }
 
-    #[Route('/terms/{type}/{id}/delete', name: 'removeTerm', methods: 'POST')]
-    public function removeTerm(string $type, int $id): Response
+    #[Route('/{id}/delete', name: 'removeTerm', methods: 'POST')]
+    public function removeTerm(TermType $type, int $id): Response
     {
-        if ($type === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $repository = $this->termType->getRepositoryByType($type);
 
         $term = $repository->find($id);
 
@@ -134,23 +119,19 @@ class TermController extends AbstractController
         $this->entityManager->flush();
 
         return $this->redirectToRoute('showTerms', [
-            'type' => $type,
+            'type' => $type->value,
             'translation' => 'ru', // to change
         ]);
     }
 
-    #[Route('/terms/{type}/{id}/remove-translation/{translationType}/{translationId}', name: 'removeTranslation', methods: 'POST')]
-    public function removeTranslation(string $type, int $id, string $translationType, int $translationId): Response
+    #[Route('/{id}/remove-translation/{translationType}/{translationId}', name: 'removeTranslation', methods: 'POST')]
+    public function removeTranslation(TermType $type, int $id, TermType $translationType, int $translationId): Response
     {
         if ($type === $translationType) {
             throw new \Exception('ERROR 104');
         }
 
-        if ($type === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $repository = $this->termType->getRepositoryByType($type);
 
         $term = $repository->find($id);
 
@@ -158,15 +139,10 @@ class TermController extends AbstractController
             throw new NotFoundHttpException();
         }
 
-        if ($translationType === 'en') {
-            $translationRepository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $translationRepository = $this->entityManager->getRepository(TermRU::class);
-        }
-
+        $translationRepository = $this->termType->getRepositoryByType($translationType);
         $translationTerm = $translationRepository->find($translationId);
 
-        if ($translationType === 'en') {
+        if ($translationType === TermType::EN) {
             $term->removeEnglishTranslation($translationTerm);
         } else {
             $term->removeRussianTranslation($translationTerm);
@@ -175,35 +151,26 @@ class TermController extends AbstractController
         $this->entityManager->flush($term);
 
         return $this->redirectToRoute('showTerm', [
-            'type' => $type,
+            'type' => $type->value,
             'id' => $id,
         ]);
     }
 
-    #[Route('/terms/{type}/{id}/add-translations/{translationType}', name: 'AddTranslations', methods: 'POST')]
-    public function addTranslation(string $type, int $id, string $translationType, Request $request): Response
+    #[Route('/{id}/add-translations/{translationType}', name: 'AddTranslations', methods: 'POST')]
+    public function addTranslation(TermType $type, int $id, TermType $translationType, Request $request): Response
     {
         if ($type === $translationType) {
             throw new \Exception('ERROR 104');
         }
 
-        if ($type === 'en') {
-            $repository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $repository = $this->entityManager->getRepository(TermRU::class);
-        }
-
+        $repository = $this->termType->getRepositoryByType($type);
         $term = $repository->find($id);
 
         if ($term === null) {
             throw new NotFoundHttpException();
         }
 
-        if ($translationType === 'en') {
-            $translationRepository = $this->entityManager->getRepository(TermEN::class);
-        } else {
-            $translationRepository = $this->entityManager->getRepository(TermRU::class);
-        }
+        $translationRepository = $this->termType->getRepositoryByType($translationType);
 
         foreach ($request->get('translations') as $translation) {
             if (!$translation) {
@@ -213,7 +180,9 @@ class TermController extends AbstractController
             $translationTerm = $translationRepository->findOneBy(['term' => $translation]);
 
             if ($translationTerm === null) {
-                $translationTerm = new TermRU(); // HARDCODED
+                $translationEntityClass = $this->termType->getEntityClassByType($translationType);
+
+                $translationTerm = new $translationEntityClass();
                 $translationTerm->setTerm($translation);
 
                 $this->entityManager->persist($translationTerm);
@@ -225,7 +194,7 @@ class TermController extends AbstractController
         $this->entityManager->flush();
 
         return $this->redirectToRoute('showTerm', [
-            'type' => $type,
+            'type' => $type->value,
             'id' => $id,
         ]);
     }
